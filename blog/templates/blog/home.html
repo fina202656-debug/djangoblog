@@ -1,0 +1,97 @@
+{% extends "blog/base.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+
+<!-- Search Box -->
+<form method="GET" class="mb-4">
+  <div class="input-group">
+    <input
+      type="text"
+      name="q"
+      class="form-control"
+      placeholder="Search posts..."
+      value="{{ query }}"
+    >
+    {% if category_id %}
+      <input type="hidden" name="category" value="{{ category_id }}">
+    {% endif %}
+    <button type="submit" class="btn btn-primary">Search</button>
+  </div>
+</form>
+
+<div class="row">
+  {% for post in page_obj %}
+    <div class="col-md-4 mb-4">
+      <div class="card h-100">
+
+        {% if post.cover_image %}
+          <img
+            src="{{ post.cover_image.url }}"
+            class="card-img-top"
+            alt="{{ post.title }}"
+            style="height: 200px; object-fit: cover;"
+          >
+        {% endif %}
+
+        <div class="card-body">
+          <h5 class="card-title">{{ post.title }}</h5>
+          <p class="card-text">{{ post.content|truncatewords:20 }}</p>
+          <a href="{% url 'post_detail' post.slug %}" class="btn btn-primary">Read more</a>
+        </div>
+
+      </div>
+    </div>
+  {% empty %}
+    <p>No posts found.</p>
+  {% endfor %}
+</div>
+
+<!-- Pagination Navigation -->
+{% if page_obj.has_other_pages %}
+<nav class="my-4">
+  <ul class="pagination">
+
+    {% if page_obj.has_previous %}
+      <li class="page-item">
+        <a class="page-link"
+           href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query|urlencode }}{% endif %}{% if category_id %}&category={{ category_id }}{% endif %}">Previous</a>
+      </li>
+    {% endif %}
+
+    <li class="page-item disabled">
+      <span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+    </li>
+
+    {% if page_obj.has_next %}
+      <li class="page-item">
+        <a class="page-link"
+           href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query|urlencode }}{% endif %}{% if category_id %}&category={{ category_id }}{% endif %}">Next</a>
+      </li>
+    {% endif %}
+
+  </ul>
+</nav>
+{% endif %}
+
+<hr>
+
+<!-- Categories Section -->
+<h5>Categories</h5>
+
+<ul class="list-unstyled">
+  <li>
+    <a href="{% url 'home' %}" class="{% if not category_id %}fw-bold{% endif %}">All posts</a>
+  </li>
+  {% for category in categories %}
+    <li>
+      <a href="?category={{ category.id }}"
+         class="{% if category_id == category.id|stringformat:'s' %}fw-bold{% endif %}">
+        {{ category.name }} ({{ category.post_count }})
+      </a>
+    </li>
+  {% endfor %}
+</ul>
+
+{% endblock %}
