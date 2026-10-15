@@ -4,7 +4,7 @@
 
 {% block content %}
 
-<!-- Search Box -->
+<!-- Search Box and Category Filter -->
 <form method="GET" class="mb-4">
   <div class="input-group">
     <input
@@ -14,24 +14,42 @@
       placeholder="Search posts..."
       value="{{ query }}"
     >
-    {% if category_id %}
-      <input type="hidden" name="category" value="{{ category_id }}">
-    {% endif %}
+
+    <select name="category" class="form-select">
+      <option value="">All Categories</option>
+
+      {% for category in categories %}
+        <option
+          value="{{ category.id }}"
+          {% if category_id == category.id|stringformat:'s' %}selected{% endif %}
+        >
+          {{ category.name }}
+        </option>
+      {% endfor %}
+    </select>
+
     <button type="submit" class="btn btn-primary">Search</button>
   </div>
 </form>
 
-<div class="row">
+<div class="row row-cols-1 row-cols-md-3 g-4">
   {% for post in page_obj %}
-    <div class="col-md-4 mb-4">
-      <div class="card h-100">
+    <div class="col">
+      <div class="card h-100 shadow-sm">
 
         {% if post.cover_image %}
           <img
             src="{{ post.cover_image.url }}"
             class="card-img-top"
             alt="{{ post.title }}"
-            style="height: 200px; object-fit: cover;"
+            style="height: 220px; object-fit: cover;"
+          >
+        {% elif post.image %}
+          <img
+            src="{{ post.image.url }}"
+            class="card-img-top"
+            alt="{{ post.title }}"
+            style="height: 220px; object-fit: cover;"
           >
         {% endif %}
 
@@ -84,6 +102,7 @@
   <li>
     <a href="{% url 'home' %}" class="{% if not category_id %}fw-bold{% endif %}">All posts</a>
   </li>
+
   {% for category in categories %}
     <li>
       <a href="?category={{ category.id }}"
